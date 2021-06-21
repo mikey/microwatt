@@ -10,6 +10,7 @@ YOSYS     ?= yosys
 NEXTPNR   ?= nextpnr-ecp5
 ECPPACK   ?= ecppack
 OPENOCD   ?= openocd
+VUNITRUN  ?= python3 ./run.py
 
 # We need a version of GHDL built with either the LLVM or gcc backend.
 # Fedora provides this, but other distros may not. Another option is to use
@@ -37,6 +38,7 @@ YOSYS     = $(DOCKERBIN) $(DOCKERARGS) hdlc/ghdl:yosys yosys
 NEXTPNR   = $(DOCKERBIN) $(DOCKERARGS) hdlc/nextpnr:ecp5 nextpnr-ecp5
 ECPPACK   = $(DOCKERBIN) $(DOCKERARGS) hdlc/prjtrellis ecppack
 OPENOCD   = $(DOCKERBIN) $(DOCKERARGS) --device /dev/bus/usb hdlc/prog openocd
+VUNITRUN  = $(DOCKERBIN) $(DOCKERARGS) ghdl/vunit:llvm python3 ./run.py
 endif
 
 all = core_tb icache_tb dcache_tb dmi_dtm_tb \
@@ -215,6 +217,9 @@ tests = $(sort $(patsubst tests/%.out,%,$(wildcard tests/*.out)))
 tests_console = $(sort $(patsubst tests/%.console_out,%,$(wildcard tests/*.console_out)))
 
 tests_console: $(tests_console)
+
+check_vunit:
+	$(VUNITRUN) -p10
 
 check: $(tests) tests_console test_micropython test_micropython_long tests_unit
 
